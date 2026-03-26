@@ -1,0 +1,17 @@
+{
+  "name": "course-redesign-platform",
+  "version": "1.0.0",
+  "description": "AI-Powered Course Redesign Platform via Gemini API",
+  "main": "index.html",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "ai",
+    "course",
+    "redesign"
+  ],
+  "author": "Palestine Ahliya University",
+  "license": "MIT"
+}

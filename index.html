@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Course Redesign Platform | Palestine Ahliya University</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1F4E79;
+      --primary-light: #2E75B6;
+      --accent: #C00000;
+      --teal: #0d9488;
+      --purple: #7c3aed;
+      --gold: #C9A84C;
+      --bg: #f0f4f8;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --font: 'Cairo', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: var(--font);
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4 { color: var(--primary); font-weight: 700; }
+    
+    /* Header */
+    header {
+      background-color: var(--card);
+      box-shadow: var(--shadow);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo h1 { font-size: 1.25rem; margin: 0; }
+    .logo span { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; }
+    
+    /* Layout */
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-family: var(--font);
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-light);
+      transform: translateY(-1px);
+    }
+    .btn-outline {
+      background-color: transparent;
+      border: 2px solid var(--border);
+      color: var(--text-main);
+    }
+    .btn-outline:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    
+    /* Forms */
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 2rem;
+      border: 1px solid var(--border);
+    }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: 1rem;
+      transition: border-color 0.2s;
+      background: #fafafa;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      background: white;
+    }
+    textarea.form-control { resize: vertical; min-height: 150px; }
+
+    /* Loading Status */
+    #loading { display: none; text-align: center; padding: 4rem 2rem; }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 5px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .status-steps {
+      max-width: 400px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    [dir="rtl"] .status-steps { text-align: right; }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .step.active { color: var(--primary); }
+    .step.done { color: var(--teal); }
+    .step-icon {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: white;
+    }
+    .step.active .step-icon { background: var(--primary); }
+    .step.done .step-icon { background: var(--teal); }
+
+    /* Error Alert */
+    .alert {
+      padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: none;
+      font-weight: 600;
+      align-items: center;
+      gap: 12px;
+    }
+    .alert-error { background-color: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
+    /* Results layout */
+    #results { display: none; }
+    .stats-bar {
+      display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .stat-badge {
+      background: var(--card); border: 1px solid var(--border);
+      padding: 0.5rem 1rem; border-radius: 20px;
+      font-weight: 600; font-size: 0.9rem;
+      box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+    }
+    
+    /* Tabs */
+    .tabs {
+      display: flex; border-bottom: 2px solid var(--border); margin-bottom: 2rem;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      padding: 1rem 1.5rem; background: transparent; border: none;
+      font-family: var(--font); font-size: 1.05rem; font-weight: 700;
+      color: var(--text-muted); cursor: pointer;
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
+      white-space: nowrap; transition: all 0.2s;
+    }
+    .tab-btn:hover { color: var(--primary); }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    
+    .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+    .tab-pane.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Badges & Tables */
+    .badge {
+      display: inline-block; padding: 0.25rem 0.75rem; border-radius: 999px;
+      font-size: 0.85rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge.red { background: #fee2e2; color: #991b1b; }
+    .badge.yellow { background: #fef3c7; color: #92400e; }
+    .badge.green { background: #d1fae5; color: #065f46; }
+    .badge.blue { background: #dbeafe; color: #1e40af; }
+    .badge.purple { background: #f3e8ff; color: #6b21a8; }
+    .badge.gray { background: #f1f5f9; color: #475569; }
+    
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; background: var(--card); border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); }
+    th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+    [dir="rtl"] th, [dir="rtl"] td { text-align: right; }
+    th { background: #f8fafc; font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; }
+    tr:last-child td { border-bottom: none; }
+
+    /* Specific components */
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .info-item { background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid var(--border); }
+    .info-item .label { display: block; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.25rem; font-weight: 700; }
+    .info-item .val { font-weight: 600; font-size: 1.1rem; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+    
+    .week-card { border-left: 4px solid var(--primary-light); }
+    [dir="rtl"] .week-card { border-left: none; border-right: 4px solid var(--primary-light); }
+    .week-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+    .tool-chip { display: inline-block; background: var(--bg); border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; margin-right: 6px; margin-bottom: 6px; }
+    [dir="rtl"] .tool-chip { margin-right: 0; margin-left: 6px; }
+    .mini-task { background: #f0fdf4; border: 1px dashed #86efac; padding: 12px; border-radius: 8px; margin-top: 1rem; color: #166534; font-weight: 600; }
+    
+    .toolbox-card .icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+    .why-banner { background: #eff6ff; color: #1e3a8a; padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; }
+    .ai-feature { background: #fef3c7; border-left: 3px solid #f59e0b; padding: 8px 12px; margin-top: 12px; }
+    [dir="rtl"] .ai-feature { border-left: none; border-right: 3px solid #f59e0b; }
+
+    /* Action bar */
+    .action-bar { border-top: 2px solid var(--border); padding-top: 2rem; margin-top: 3rem; display: flex; justify-content: space-between; align-items: center; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <h1>جامعة فلسطين الأهلية</h1>
+      <span>|</span>
+      <span id="loc-app-title">Course Redesign Platform</span>
+    </div>
+    <button id="langToggle" class="btn btn-outline" style="padding: 0.4rem 1rem">عربي</button>
+  </header>
+
+  <main>
+    <div id="errorAlert" class="alert alert-error">
+      <span id="errorMsg"></span>
+    </div>
+
+    <!-- 1. Form Section -->
+    <section id="welcome">
+      <h2 style="font-size: 2rem; margin-bottom: 0.5rem;" id="loc-hero-title">AI Course Redesign</h2>
+      <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 1.1rem;" id="loc-hero-desc">Enter your course details and intended learning outcomes to generate a smart remote learning plan instantly.</p>
+
+      <div class="card">
+        <form id="redesignForm">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label" for="courseName" id="loc-label-course">Course Name</label>
+              <input type="text" id="courseName" class="form-control" required placeholder="e.g. Introduction to Programming">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="domain" id="loc-label-domain">Domain</label>
+              <select id="domain" class="form-control" required>
+                <option value="Computer Science">Computer Science & IT</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Business">Business & Economics</option>
+                <option value="Health">Health & Medical</option>
+                <option value="General">General Education / Arts</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ilos" id="loc-label-ilos">Intended Learning Outcomes (ILOs)</label>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;" id="loc-desc-ilos">Paste the current course ILOs. Gemini will upgrade them and structure the learning plan around them.</p>
+            <textarea id="ilos" class="form-control" required placeholder="1. Students will understand...
+2. Students will learn how to..."></textarea>
+          </div>
+          <div style="text-align: right;">
+            <button type="submit" class="btn btn-primary" id="loc-btn-generate">Generate Course Redesign ✨</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- 2. Loading Section -->
+    <section id="loading">
+      <div class="spinner"></div>
+      <h3 style="margin-bottom: 1.5rem;" id="loc-loading-title">Generating Redesign Package...</h3>
+      <div class="status-steps">
+        <div class="step active" id="step1">
+          <div class="step-icon">1</div>
+          <span id="loc-step-1">Analyzing Data & Upgrading ILOs</span>
+        </div>
+        <div class="step" id="step2">
+          <div class="step-icon">2</div>
+          <span id="loc-step-2">Designing Smart Remote Learning Plan</span>
+        </div>
+        <div class="step" id="step3">
+          <div class="step-icon">3</div>
+          <span id="loc-step-3">Creating Toolbox & Assessments</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Results Section -->
+    <section id="results">
+      <div class="stats-bar" id="statsBar">
+        <!-- populated dynamically -->
+      </div>
+      
+      <div class="tabs">
+        <button class="tab-btn active" data-target="tab-analysis" id="loc-tab-1">🔍 Analysis</button>
+        <button class="tab-btn" data-target="tab-ilos" id="loc-tab-2">🎯 Upgraded ILOs</button>
+        <button class="tab-btn" data-target="tab-plan" id="loc-tab-3">📅 Remote Plan</button>
+        <button class="tab-btn" data-target="tab-toolbox" id="loc-tab-4">🧰 Toolbox</button>
+        <button class="tab-btn" data-target="tab-assessment" id="loc-tab-5">📊 Assessment</button>
+        <button class="tab-btn" data-target="tab-zoom" id="loc-tab-6">🎥 Zoom Guide</button>
+      </div>
+
+      <div class="tab-content">
+        <!-- Tab 1: Analysis -->
+        <div id="tab-analysis" class="tab-pane active">
+          <div class="info-grid" id="courseInfoGrid"></div>
+          <h3 style="margin-bottom: 1rem; margin-top: 2rem;">Course Weaknesses & Risks</h3>
+          <div id="weaknessesContainer" class="grid-2"></div>
+        </div>
+
+        <!-- Tab 2: ILOs -->
+        <div id="tab-ilos" class="tab-pane">
+          <div style="background: var(--bg); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: flex; gap: 1rem; align-items: center;">
+            <div style="font-size: 2rem;">💡</div>
+            <div>
+              <strong>Why upgrade ILOs?</strong>
+              <p style="font-size: 0.9rem; margin-top: 4px;">We transition passive verbs (understand, learn) to high-level Bloom's Taxonomy verbs (evaluate, create, design) to promote active learning and make AI-cheating easily detectable.</p>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Original</th>
+                <th>Upgraded (Active)</th>
+                <th>Bloom's Level</th>
+              </tr>
+            </thead>
+            <tbody id="ilosTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Tab 3: Remote Plan -->
+        <div id="tab-plan" class="tab-pane">
+          <div id="weeklyPlanContainer"></div>
+        </div>
+
+        <!-- Tab 4: Toolbox -->
+        <div id="tab-toolbox" class="tab-pane">
+          <div id="toolboxContainer" class="grid-2 mb-4"></div>
+          <h3 style="margin: 2rem 0 1rem;">Recommended Free Tools</h3>
+          <table>
+            <thead>
+              <tr><th>Tool Name</th><th>Purpose</th><th>Link</th></tr>
+            </thead>
+            <tbody id="freeToolsTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Tab 5: Assessment -->
+        <div id="tab-assessment" class="tab-pane">
+          <div id="assessmentsContainer" class="grid-2"></div>
+        </div>
+
+        <!-- Tab 6: Zoom Guide -->
+        <div id="tab-zoom" class="tab-pane">
+          <div class="card">
+            <h3 style="margin-bottom: 1rem;">Typical Live Session Master Script</h3>
+            <table>
+              <thead>
+                <tr><th>Time</th><th>Phase</th><th>Instructor Action</th></tr>
+              </thead>
+              <tbody id="zoomScriptBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn btn-outline" onclick="resetApp()" id="loc-btn-new">New Course</button>
+        <div>
+          <button class="btn btn-outline" onclick="window.print()" style="margin-right: 8px;" id="loc-btn-print">Print Report</button>
+          <button class="btn btn-primary" onclick="exportData()" id="loc-btn-export">Export JSON</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // System State
+    const state = {
+      lang: 'en',
+      form: { courseName: '', domain: '', ilos: '' },
+      data: { call1: null, call2: null, call3: null }
+    };
+
+    const dictionary = {
+      en: {
+        'loc-app-title': 'Course Redesign Platform',
+        'loc-toggle': 'عربي',
+        'loc-hero-title': 'AI Course Redesign',
+        'loc-hero-desc': 'Enter your course details and intended learning outcomes to generate a smart remote learning plan instantly.',
+        'loc-label-course': 'Course Name',
+        'loc-label-domain': 'Subject Domain',
+        'loc-label-ilos': 'Intended Learning Outcomes (ILOs)',
+        'loc-desc-ilos': 'Paste the current course ILOs. Gemini will upgrade them and structure the learning plan around them.',
+        'loc-btn-generate': 'Generate Course Redesign ✨',
+        'loc-loading-title': 'Generating Redesign Package...',
+        'loc-step-1': 'Analyzing Data & Upgrading ILOs',
+        'loc-step-2': 'Designing Smart Remote Learning Plan',
+        'loc-step-3': 'Creating Toolbox & Assessments',
+        'loc-tab-1': '🔍 Analysis', 'loc-tab-2': '🎯 Upgraded ILOs', 'loc-tab-3': '📅 Remote Plan',
+        'loc-tab-4': '🧰 Toolbox', 'loc-tab-5': '📊 Assessment', 'loc-tab-6': '🎥 Zoom Guide',
+        'loc-btn-new': 'New Course', 'loc-btn-print': 'Print Report', 'loc-btn-export': 'Export JSON'
+      },
+      ar: {
+        'loc-app-title': 'منصة إعادة تصميم المساقات',
+        'loc-toggle': 'English',
+        'loc-hero-title': 'الذكاء الاصطناعي لتصميم المساقات',
+        'loc-hero-desc': 'أدخل تفاصيل المساق ومخرجات التعلم لإنشاء خطة تعلم عن بعد ذكية على الفور.',
+        'loc-label-course': 'اسم المساق',
+        'loc-label-domain': 'المجال / التخصص',
+        'loc-label-ilos': 'مخرجات التعلم المقصودة (ILOs)',
+        'loc-desc-ilos': 'ألصق مخرجات التعلم الحالية للمساق. سيقوم الذكاء الاصطناعي بترقيتها وبناء خطة التعلم حولها.',
+        'loc-btn-generate': 'توليد خطة المساق ✨',
+        'loc-loading-title': 'جاري إنشاء حزمة المساق...',
+        'loc-step-1': 'تحليل البيانات وترقية مخرجات التعلم',
+        'loc-step-2': 'تصميم خطة التعلم عن بعد الذكية',
+        'loc-step-3': 'إنشاء صندوق الأدوات والتقييمات',
+        'loc-tab-1': '🔍 التحليل', 'loc-tab-2': '🎯 مخرجات التعلم', 'loc-tab-3': '📅 خطة التعلم',
+        'loc-tab-4': '🧰 صندوق الأدوات', 'loc-tab-5': '📊 التقييمات', 'loc-tab-6': '🎥 دليل منصة Zoom',
+        'loc-btn-new': 'مساق جديد', 'loc-btn-print': 'طباعة التقرير', 'loc-btn-export': 'تصدير JSON'
+      }
+    };
+
+    // Initialization
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById('langToggle').addEventListener('click', toggleLang);
+      document.getElementById('redesignForm').addEventListener('submit', handleGenerate);
+      
+      // Tabs logic
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+          e.target.classList.add('active');
+          document.getElementById(e.target.getAttribute('data-target')).classList.add('active');
+        });
+      });
+    });
+
+    function toggleLang() {
+      state.lang = state.lang === 'en' ? 'ar' : 'en';
+      document.documentElement.lang = state.lang;
+      document.documentElement.dir = state.lang === 'en' ? 'ltr' : 'rtl';
+      
+      const dict = dictionary[state.lang];
+      for (const [id, text] of Object.entries(dict)) {
+        const el = document.getElementById(id);
+        if (el) {
+          if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = text;
+          else el.textContent = text;
+        }
+      }
+    }
+
+    function showError(msg) {
+      const alert = document.getElementById('errorAlert');
+      document.getElementById('errorMsg').textContent = msg;
+      alert.style.display = 'flex';
+      window.scrollTo(0,0);
+    }
+
+    // Helper: Parse Gemini JSON safely
+    function extractJSON(str) {
+      try {
+        let match = str.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+        if (match) return JSON.parse(match[1]);
+        return JSON.parse(str);
+      } catch (e) {
+        console.error("Failed to parse JSON", str);
+        throw new Error("AI returned invalid data format.");
+      }
+    }
+
+    // Main API Calling Function
+    async function fetchGemini(systemInstruction, userMessage) {
+      const res = await fetch('/api/gemini', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ systemInstruction, userMessage })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      return extractJSON(data.text);
+    }
+
+    // Process Workflows
+    async function handleGenerate(e) {
+      e.preventDefault();
+      document.getElementById('errorAlert').style.display = 'none';
+      
+      state.form.courseName = document.getElementById('courseName').value;
+      state.form.domain = document.getElementById('domain').value;
+      state.form.ilos = document.getElementById('ilos').value;
+
+      document.getElementById('welcome').style.display = 'none';
+      document.getElementById('loading').style.display = 'block';
+
+      try {
+        // --- Call 1: Analysis & ILO Upgrade ---
+        setStep(1);
+        const langIns = state.lang === 'ar' ? 'Output purely in Arabic.' : 'Output purely in English.';
+        const prompt1Sys = `You are an expert in higher education curriculum design. Analyse the course details and ILOs. ${langIns}
+Output ONLY a JSON string. Structure:
+{"courseName":"...", "domain":"...", "description":"...", "ilos":[{"code":"ILO-1", "original":"...", "upgraded":"use Bloom Level 4-6 verb...", "bloomLevel":"..."}], "weaknesses":[{"severity":"high or medium or low", "title":"...", "description":"..."}]}`;
+        const prompt1User = `Course: ${state.form.courseName}\nDomain: ${state.form.domain}\nILOs:\n${state.form.ilos}`;
+        
+        state.data.call1 = await fetchGemini(prompt1Sys, prompt1User);
+
+        // --- Call 2: Smart Remote Learning Plan ---
+        setStep(2);
+        const prompt2Sys = `You are an expert in active remote learning. Design a 14-session remote learning plan mapped to the Upgraded ILOs. All activities must be highly interactive (breakout rooms, polls, flipped classroom, etc) and UNIQUE to the specific topic. ${langIns}
+Output ONLY a JSON string. Structure:
+{"weeklyPlan":[{"num":1, "topic":"...", "activityTitle":"...", "activityDetail":"3-4 sentences of instructions", "zoomSteps":["step 1", "step 2"], "tools":["Miro", "Zoom Polls"], "miniTask":"...", "timing":"e.g. 45 mins"}]}`;
+        const prompt2User = `Course: ${state.data.call1.courseName}\nILOs:\n${JSON.stringify(state.data.call1.ilos)}`;
+        
+        state.data.call2 = await fetchGemini(prompt2Sys, prompt2User);
+
+        // --- Call 3: Toolbox & Assessments ---
+        setStep(3);
+        const prompt3Sys = `You are an expert in anti-AI cheating assessment and pedagogical strategies. Use the course plan to formulate an instructor toolbox, new assessments, and live session script. Assess on critical thinking, not recall. ${langIns}
+Output ONLY a JSON string. Structure:
+{"toolbox":[{"icon":"📝", "title":"...", "description":"...", "steps":["s1","s2"], "tools":["t1"], "whyThisCourse":"..."}], "newAssessments":[{"name":"...", "percentage":"%", "description":"...", "antiAiFeature":"..."}], "sessionScript":[{"time":"0-15", "phase":"Hooks", "action":"..."}], "freeTools":[{"name":"...", "url":"...", "use":"..."}]}`;
+        const prompt3User = `Course: ${state.data.call1.courseName}\nPlan:\n${JSON.stringify(state.data.call2.weeklyPlan)}`;
+        
+        state.data.call3 = await fetchGemini(prompt3Sys, prompt3User);
+
+        renderResults();
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('results').style.display = 'block';
+        
+      } catch (err) {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('welcome').style.display = 'block';
+        showError(err.message);
+      }
+    }
+
+    function setStep(num) {
+      document.querySelectorAll('.step').forEach((s, idx) => {
+        if (idx + 1 < num) { s.classList.add('done'); s.classList.remove('active'); }
+        else if (idx + 1 === num) { s.classList.add('active'); s.classList.remove('done'); }
+        else { s.classList.remove('active', 'done'); }
+      });
+    }
+
+    // --- Render Logic ---
+    function renderResults() {
+      const d1 = state.data.call1;
+      const d2 = state.data.call2;
+      const d3 = state.data.call3;
+
+      // Stats
+      document.getElementById('statsBar').innerHTML = `
+        <div class="stat-badge">📘 ${d1.courseName}</div>
+        <div class="stat-badge">🎯 ${d1.ilos?.length || 0} ILOs Upgraded</div>
+        <div class="stat-badge">📅 ${d2.weeklyPlan?.length || 0} remote sessions designed</div>
+        <div class="stat-badge">✅ ${d3.newAssessments?.length || 0} assessments redefined</div>
+      `;
+
+      // Tab 1: Analysis
+      document.getElementById('courseInfoGrid').innerHTML = `
+        <div class="info-item"><span class="label">Course Name</span><span class="val">${d1.courseName || ''}</span></div>
+        <div class="info-item"><span class="label">Domain</span><span class="val">${d1.domain || ''}</span></div>
+        <div class="info-item" style="grid-column: 1 / -1"><span class="label">Course Description</span><span class="val" style="font-size:0.95rem; font-weight:400">${d1.description || ''}</span></div>
+      `;
+      document.getElementById('weaknessesContainer').innerHTML = (d1.weaknesses || []).map(w => `
+        <div class="card" style="margin-bottom:0">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+            <h4 style="margin:0">${w.title}</h4>
+            <span class="badge ${w.severity==='high'?'red':(w.severity==='medium'?'yellow':'blue')}">${w.severity}</span>
+          </div>
+          <p style="font-size:0.9rem; color:var(--text-muted);">${w.description}</p>
+        </div>
+      `).join('');
+
+      // Tab 2: ILOs
+      document.getElementById('ilosTableBody').innerHTML = (d1.ilos || []).map(i => {
+        const bl = (i.bloomLevel || '').toLowerCase();
+        let color = 'gray';
+        if (bl.includes('create') || bl.includes('evaluate') || bl.includes('design')) color = 'green';
+        else if (bl.includes('analyze') || bl.includes('apply')) color = 'blue';
+        return `<tr>
+          <td style="font-weight:700">${i.code}</td>
+          <td style="color:var(--text-muted); font-size:0.9rem;">${i.original}</td>
+          <td style="font-weight:600; color:var(--primary);">${i.upgraded}</td>
+          <td><span class="badge ${color}">${i.bloomLevel}</span></td>
+        </tr>`;
+      }).join('');
+
+      // Tab 3: Remote Plan
+      document.getElementById('weeklyPlanContainer').innerHTML = (d2.weeklyPlan || []).map(w => `
+        <div class="card week-card">
+          <div class="week-header">
+            <h3 style="margin:0">Session ${w.num}: ${w.topic}</h3>
+            <span class="badge purple">⏱ ${w.timing}</span>
+          </div>
+          <h4 style="margin-bottom:8px; display:flex; gap:8px;">💡 ${w.activityTitle}</h4>
+          <p style="margin-bottom:12px">${w.activityDetail}</p>
+          <div style="margin-bottom:12px;"><strong>Step-by-step Execution:</strong><ol style="margin: 8px 16px;">
+            ${(w.zoomSteps||[]).map(s => `<li>${s}</li>`).join('')}
+          </ol></div>
+          <div>${(w.tools||[]).map(t => `<span class="tool-chip">${t}</span>`).join('')}</div>
+          <div class="mini-task">🧩 <strong>Mini-task:</strong> ${w.miniTask}</div>
+        </div>
+      `).join('');
+
+      // Tab 4: Toolbox
+      document.getElementById('toolboxContainer').innerHTML = (d3.toolbox || []).map(t => `
+        <div class="card toolbox-card" style="margin-bottom:0">
+          <span class="icon">${t.icon}</span>
+          <h4 style="margin-bottom:8px">${t.title}</h4>
+          <div class="why-banner">🎯 ${t.whyThisCourse}</div>
+          <p style="margin-bottom:12px; font-size:0.9rem;">${t.description}</p>
+          <ul style="margin:0 16px 16px; font-size:0.9rem;">${(t.steps||[]).map(s => `<li>${s}</li>`).join('')}</ul>
+          <div>${(t.tools||[]).map(tl => `<span class="tool-chip">${tl}</span>`).join('')}</div>
+        </div>
+      `).join('');
+      document.getElementById('freeToolsTableBody').innerHTML = (d3.freeTools || []).map(t => `
+        <tr><td><strong>${t.name}</strong></td><td>${t.use}</td><td><a href="${t.url}" target="_blank" style="color:var(--primary)">Link »</a></td></tr>
+      `).join('');
+
+      // Tab 5: Assessments
+      document.getElementById('assessmentsContainer').innerHTML = (d3.newAssessments || []).map(a => `
+        <div class="card" style="margin-bottom:0">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h4 style="margin:0">${a.name}</h4>
+            <span class="badge blue">${a.percentage}</span>
+          </div>
+          <p style="margin-bottom:12px; font-size:0.95rem;">${a.description}</p>
+          <div class="ai-feature"><strong>🛡 AI-Resistant Feature:</strong><br>${a.antiAiFeature}</div>
+        </div>
+      `).join('');
+
+      // Tab 6: Zoom Guide
+      document.getElementById('zoomScriptBody').innerHTML = (d3.sessionScript || []).map(s => `
+        <tr>
+          <td style="font-weight:700; width:100px;">${s.time}</td>
+          <td><span class="badge gray">${s.phase}</span></td>
+          <td>${s.action}</td>
+        </tr>
+      `).join('');
+    }
+
+    function resetApp() {
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('welcome').style.display = 'block';
+      state.data = { call1: null, call2: null, call3: null };
+      window.scrollTo(0,0);
+    }
+
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.data, null, 2));
+      const node = document.createElement('a');
+      node.setAttribute("href", dataStr);
+      node.setAttribute("download", "course_redesign.json");
+      document.body.appendChild(node);
+      node.click();
+      node.remove();
+    }
+  </script>
+</body>
+</html>
